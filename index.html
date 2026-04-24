@@ -40,6 +40,23 @@
 <body>
 
 <div id="toast">Notifikasi</div>
+<div id="confirmModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]">
+    <div class="bg-slate-800 p-6 rounded-2xl w-[85%] max-w-sm text-center border border-slate-700">
+        <p id="confirmText" class="text-white font-semibold mb-6">
+            Hapus data & tutup room?
+        </p>
+        <div class="flex gap-3">
+            <button onclick="closeConfirm(false)" 
+                class="flex-1 bg-slate-700 py-2 rounded-lg text-sm font-bold">
+                Batal
+            </button>
+            <button onclick="closeConfirm(true)" 
+                class="flex-1 bg-red-600 py-2 rounded-lg text-sm font-bold">
+                Ya, Tutup
+            </button>
+        </div>
+    </div>
+</div>
 <div id="loading"><div class="w-12 h-12 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin mb-4"></div><p class="text-white text-xs uppercase font-bold tracking-widest">Memproses...</p></div>
 
 <div class="app-container flex flex-col px-6 py-8">
@@ -98,7 +115,18 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwDZtLOZFajqfJoj2NilDcncfBaQZsJGWC87PU7LIq_nI5H6gEe3TKscYH4Ku9xWmoi/exec"; 
     let STATE = { roomId: "", playerName: "", role: "", isPlaying: false, intervalId: null, lastWord: "" };
+    let confirmCallback = null;
 
+    function showConfirm(message, callback) {
+        document.getElementById('confirmText').innerText = message;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        confirmCallback = callback;
+    }
+    
+    function closeConfirm(result) {
+        document.getElementById('confirmModal').classList.add('hidden');
+        if (confirmCallback) confirmCallback(result);
+    }
     async function fetchAPI(action, payload) {
         try {
             const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action, ...payload }) });
@@ -164,9 +192,16 @@
     }
 
     async function handleWasitCloseRoom() {
-        if(!confirm("Hapus data & tutup room?")) return;
-        showLoading(true);
-        try { await fetchAPI('closeRoom', { roomId: STATE.roomId }); handleLogout(); } catch (e) {} finally { showLoading(false); }
+        showConfirm("Hapus data & tutup room?", async (ok) => {
+            if (!ok) return;
+    
+            showLoading(true);
+            try {
+                await fetchAPI('closeRoom', { roomId: STATE.roomId });
+                handleLogout();
+            } catch (e) {} 
+            finally { showLoading(false); }
+        });
     }
 
     function startPolling() { if(STATE.intervalId) clearInterval(STATE.intervalId); pollLobby(); STATE.intervalId = setInterval(pollLobby, 3000); }
