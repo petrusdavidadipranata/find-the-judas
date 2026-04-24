@@ -1,0 +1,20 @@
+{
+  "name": "Find The Judas",
+  "short_name": "Judas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "https://petrusdavidadipranata.github.io/logo-judas.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://petrusdavidadipranata.github.io/logo-judas.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
